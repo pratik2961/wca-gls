@@ -1,5 +1,3 @@
-from time import time
-from turtle import width
 from urlextract import URLExtract
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
