@@ -6,6 +6,9 @@ from wordcloud import WordCloud
 from collections import Counter
 import pandas as pd
 import emoji
+import matplotlib
+
+matplotlib.use('Agg')
 
 extract = URLExtract()
 def fetch_stats(selected_user,df):
