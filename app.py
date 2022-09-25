@@ -3,6 +3,9 @@ import preprocessor
 import helper
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use('Agg')
 
 st.sidebar.title("Whatsapp Chat Analyzer")
 
