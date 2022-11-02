@@ -9,6 +9,14 @@ import matplotlib
 matplotlib.use('Agg')
 
 extract = URLExtract()
+
+
+f = open("positive-words.txt","r")
+positive_word = f.read().split("\n")
+
+f = open("negative-words.txt","r")
+negative_word = f.read().split("\n")
+
 def fetch_stats(selected_user,df):
     if selected_user != "Overall":
         df = df[df['users'] ==  selected_user]
@@ -121,3 +129,134 @@ def activity_heatmap(selected_user,df):
     
     heat_map = df.pivot_table(index='month',columns='period',values='message',aggfunc='count').fillna(0)
     return heat_map
+
+def positive_word_count(selected_user,df):
+    if selected_user != "Overall":
+        df = df[df['users'] ==  selected_user]
+        
+    positive_word_count = 0
+
+    for msg in df['message'][1:]:
+        l = msg.split(" ")
+        for word in l:
+            if word != "":
+                if word in positive_word:
+                    positive_word_count = positive_word_count + 1
+    return positive_word_count
+
+
+def negative_word_count(selected_user,df):
+    if selected_user != "Overall":
+        df = df[df['users'] ==  selected_user]
+        
+    negative_word_count = 0
+
+    for msg in df['message'][1:]:
+        l = msg.split(" ")
+        for word in l:
+            if word != "":
+                if word in negative_word:
+                    negative_word_count = negative_word_count + 1
+    return negative_word_count
+
+def positive_word_df(selected_user,df):
+    if selected_user != "Overall":
+        df = df[df['users'] ==  selected_user]
+    positive_word_dict = {}
+    for msg in df['message'][1:]:
+        l = msg.split(" ")
+        for word in l:
+            if word in positive_word:
+                if word != "":
+                    if word not in positive_word_dict:
+                        positive_word_dict[word] = 1
+                    else:
+                        positive_word_dict[word] = positive_word_dict[word] + 1
+    positive_df = pd.DataFrame({"word":positive_word_dict.keys(),"count":positive_word_dict.values()})
+    return positive_df
+
+
+def negative_word_df(selected_user,df):
+    if selected_user != "Overall":
+        df = df[df['users'] ==  selected_user]
+    negative_word_dict = {}
+    for msg in df['message'][1:]:
+        l = msg.split(" ")
+        for word in l:
+            if word in negative_word:
+                if word != "":
+                    if word not in negative_word_dict:
+                        negative_word_dict[word] = 1
+                    else:
+                        negative_word_dict[word] = negative_word_dict[word] + 1
+    negative_df = pd.DataFrame({"word":negative_word_dict.keys(),"count":negative_word_dict.values()})
+    return negative_df
+
+
+def comparison_positive_negative(user_list,df):
+    positive_count = []
+    negative_count = []
+
+    for name in user_list[1:]:
+        pc  = positive_word_count(name,df)
+        positive_count.append(pc)
+
+    p_df = pd.DataFrame({"name":user_list[1:],"count":positive_count})
+    
+    for name in user_list[1:]:
+        nc  = negative_word_count(name,df)
+        negative_count.append(nc)
+
+    n_df = pd.DataFrame({"name":user_list[1:],"count":negative_count})
+
+    return p_df,n_df
+
+def user_positive_negative(selected_user,df):
+    
+    if selected_user != "Overall":
+        df = df[df['users'] ==  selected_user]
+    pc  = positive_word_count(selected_user,df)
+    nc  = negative_word_count(selected_user,df)
+
+    df1 = pd.DataFrame()
+    df1["type"] = ["Positive","Negative"]
+    df1["count"] = [pc,nc]
+
+    return df1
+
+
+def list_of_message(selected_user,df,word):
+    if selected_user == "Overall":
+        new_df = pd.DataFrame()
+        time_list = []
+        user_list = []
+        msg_list = []
+        for i in range(0,df.shape[0]):
+            
+            msg_word_list = df["message"][i].split(" ")
+            if word in msg_word_list: 
+                msg_list.append(df["message"][i])
+                time_list.append(df["date"][i])
+                user_list.append(df["users"][i])
+        new_df["Date And Time"] = time_list
+        new_df["User"] = user_list
+        new_df["Message"] = msg_list
+        return new_df
+        
+    else:
+        new_df = pd.DataFrame()
+        time_list = []
+        user_list = []
+        msg_list = []
+        for i in range(0,df.shape[0]):
+            
+            msg_word_list = df["message"][i].split(" ")
+            if word in msg_word_list and (df["users"][i] == selected_user or df["users"][i] == "Overall") : 
+                msg_list.append(df["message"][i])
+                time_list.append(df["date"][i])
+                user_list.append(df["users"][i])
+        new_df["Date And Time"] = time_list
+        new_df["User"] = user_list
+        new_df["Message"] = msg_list
+        return new_df
+            

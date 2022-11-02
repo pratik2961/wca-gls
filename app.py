@@ -18,7 +18,8 @@ if uploaded_file is not None:
     # st.dataframe(df)
 
     user_list = df['users'].unique().tolist()
-    user_list.remove('group notification')
+    if 'group notification' in user_list:
+        user_list.remove('group notification')
     user_list.sort()
     user_list.insert(0,"Overall")
     selected_user = st.sidebar.selectbox('Show analysis wrt',user_list )
@@ -151,3 +152,82 @@ if uploaded_file is not None:
             fig,ax = plt.subplots()
             ax.pie(emoji_df['count'],labels=emoji_df['emoji'],autopct='%0.2f')
             st.pyplot(fig)
+
+
+        #positive and negative word count
+        st.title("Word Count")
+        positive_count = helper.positive_word_count(selected_user,df)
+        negative_count = helper.negative_word_count(selected_user,df)
+        col1 , col2  = st.columns(2)
+        
+        with col1:
+            
+            st.header("Positive Word Count")
+            st.title(positive_count)
+
+        with col2:
+            st.header("Negative Word Count")
+            st.title(negative_count)
+
+
+        
+        #positive and negative word dataframe
+        
+        positive_df = helper.positive_word_df(selected_user,df)
+        negative_df = helper.negative_word_df(selected_user,df)
+        col1 , col2  = st.columns(2)
+        
+        with col1:
+            
+            st.header("Positive Word With Count")
+            st.dataframe(positive_df)
+
+        with col2:
+            st.header("Negative Word With Count")
+            st.dataframe(negative_df)
+
+        p_df,n_df = helper.comparison_positive_negative(user_list,df)
+
+        
+        col1 , col2 = st.columns(2)
+
+        with col1:
+            st.title("Positive word comparison")
+            fig,ax = plt.subplots()
+            ax.pie(p_df['count'],labels=p_df['name'],autopct='%0.2f')
+            st.pyplot(fig)
+        with col2:
+            st.title("Negative word comparison")
+            fig,ax = plt.subplots()
+            ax.pie(n_df['count'],labels=n_df['name'],autopct='%0.2f')
+            st.pyplot(fig)
+
+        #negative positive comaprison for selected user
+        if selected_user != "Overall":
+            st.title("Positive and Negative Comparison for "+selected_user)
+            df1 = helper.user_positive_negative(selected_user,df)
+            fig,ax = plt.subplots()
+            ax.pie(df1['count'],labels=df1['type'],autopct='%0.2f')
+            st.pyplot(fig)
+
+
+        #select positive word
+        positive_df = helper.positive_word_df(selected_user,df)
+        positive_word_list = list(positive_df['word'])
+
+        st.header("Positive word and messages : ")
+        for i in range(0,len(positive_word_list)):
+            st.text("Word is : "+positive_word_list[i])
+            new_df = helper.list_of_message(selected_user,df,positive_word_list[i])
+            st.dataframe(new_df)
+
+
+        #select negative word
+        negative_df = helper.negative_word_df(selected_user,df)
+        negative_word_list = list(negative_df['word'])
+
+        st.header("Negative word and messages : ")
+        for i in range(0,len(negative_word_list)):
+            st.text("Word is : "+negative_word_list[i])
+            new_df = helper.list_of_message(selected_user,df,negative_word_list[i])
+            st.dataframe(new_df)
